@@ -1,0 +1,26 @@
+seed: 468
+
+data:
+  train_path: data/raw/train.jsonl
+  validation_path: data/raw/validation.jsonl
+  max_source_length: 80
+  max_target_length: 80
+  vocab_min_frequency: 1
+  vocab_max_size: 10000
+
+model:
+  embedding_dim: 64
+  encoder_hidden_dim: 64
+  decoder_hidden_dim: 128
+  attention_dim: 64
+  dropout: 0.2
+
+training:
+  batch_size: 16
+  epochs: 2
+  learning_rate: 0.001
+  max_gradient_norm: 1.0
+  num_workers: 0
+
+output:
+  directory: checkpoints/smoke
