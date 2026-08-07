@@ -33,15 +33,12 @@ def normalize_row(raw: dict[str, Any]) -> dict[str, Any] | None:
         raw_references = [raw_references]
 
     references = []
-    seen_references = set()
-
+    # Preserve every human reference, including duplicates.
     for reference in raw_references:
         reference = clean_text(reference)
-        key = reference.casefold()
 
-        if reference and key not in seen_references:
+        if reference:
             references.append(reference)
-            seen_references.add(key)
 
     if not references and target:
         references = [target]
