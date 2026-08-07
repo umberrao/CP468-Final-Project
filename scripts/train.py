@@ -150,6 +150,10 @@ def main() -> None:
         attention_dim=config["model"]["attention_dim"],
         pad_id=vocabulary.pad_id,
         dropout=config["model"]["dropout"],
+        use_attention=config["model"].get(
+            "use_attention",
+            True,
+        ),
     ).to(device)
 
     optimizer = torch.optim.Adam(
@@ -168,6 +172,7 @@ def main() -> None:
     print(f"Hardware: {hardware}")
     print(f"PyTorch: {torch.__version__}")
     print(f"Mixed precision: {use_amp}")
+    print(f"Attention: {model.use_attention}")
     print(f"Vocabulary size: {len(vocabulary):,}")
     print(f"Training examples: {len(train_dataset):,}")
     print(

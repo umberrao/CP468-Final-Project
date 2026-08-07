@@ -17,8 +17,11 @@ class Seq2Seq(nn.Module):
         attention_dim: int,
         pad_id: int,
         dropout: float = 0.1,
+        use_attention: bool = True,
     ) -> None:
         super().__init__()
+
+        self.use_attention = use_attention
 
         encoder_dim = encoder_hidden_dim * 2
 
@@ -39,6 +42,7 @@ class Seq2Seq(nn.Module):
             attention_dim=attention_dim,
             pad_id=pad_id,
             dropout=dropout,
+            use_attention=use_attention,
         )
 
     def forward(
@@ -87,7 +91,9 @@ class Seq2Seq(nn.Module):
         max_length: int,
     ) -> tuple[Tensor, Tensor]:
         if max_length < 1:
-            raise ValueError("max_length must be at least 1.")
+            raise ValueError(
+                "max_length must be at least 1."
+            )
 
         encoder_outputs, hidden, cell = self.encoder(
             source_ids,
@@ -95,12 +101,14 @@ class Seq2Seq(nn.Module):
         )
 
         batch_size = source_ids.size(0)
+
         input_ids = torch.full(
             (batch_size,),
             bos_id,
             dtype=torch.long,
             device=source_ids.device,
         )
+
         finished = torch.zeros(
             batch_size,
             dtype=torch.bool,
@@ -120,22 +128,34 @@ class Seq2Seq(nn.Module):
             )
 
             predicted_ids = logits.argmax(dim=1)
+
             predicted_ids = torch.where(
                 finished,
-                torch.full_like(predicted_ids, eos_id),
+                torch.full_like(
+                    predicted_ids,
+                    eos_id,
+                ),
                 predicted_ids,
             )
 
             generated_steps.append(predicted_ids)
             attention_steps.append(attention)
 
-            finished = finished | predicted_ids.eq(eos_id)
+            finished = (
+                finished
+                | predicted_ids.eq(eos_id)
+            )
+
             input_ids = predicted_ids
 
             if finished.all():
                 break
 
-        generated = torch.stack(generated_steps, dim=1)
+        generated = torch.stack(
+            generated_steps,
+            dim=1,
+        )
+
         attention_weights = torch.stack(
             attention_steps,
             dim=1,

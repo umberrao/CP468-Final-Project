@@ -203,8 +203,18 @@ def main() -> None:
                 + "\n"
             )
 
+    use_attention = config["model"].get(
+        "use_attention",
+        True,
+    )
+
     summary = {
-        "model": "lstm_attention",
+        "model": (
+            "lstm_attention"
+            if use_attention
+            else "lstm_no_attention"
+        ),
+        "use_attention": use_attention,
         "test_examples": len(records),
         "full_test_set": (
             len(records) == EXPECTED_TEST_SIZE

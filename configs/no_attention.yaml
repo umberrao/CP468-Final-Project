@@ -14,7 +14,7 @@ model:
   decoder_hidden_dim: 256
   attention_dim: 256
   dropout: 0.3
-  use_attention: true
+  use_attention: false
 
 training:
   batch_size: 32
@@ -25,4 +25,4 @@ training:
   mixed_precision: true
 
 output:
-  directory: checkpoints/final
+  directory: checkpoints/no_attention

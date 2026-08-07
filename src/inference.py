@@ -34,6 +34,10 @@ def load_model(
         attention_dim=config["model"]["attention_dim"],
         pad_id=vocabulary.pad_id,
         dropout=config["model"]["dropout"],
+        use_attention=config["model"].get(
+            "use_attention",
+            True,
+        ),
     ).to(device)
 
     model.load_state_dict(
