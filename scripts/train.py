@@ -10,6 +10,7 @@ from pathlib import Path
 import torch
 import yaml
 from torch.utils.data import DataLoader
+from tqdm.auto import tqdm
 
 from src.data import (
     SimplificationDataset,
@@ -47,6 +48,14 @@ def main() -> None:
         "cuda" if torch.cuda.is_available() else "cpu"
     )
 
+    use_amp = (
+        config["training"].get(
+            "mixed_precision",
+            False,
+        )
+        and device.type == "cuda"
+    )
+
     train_path = Path(config["data"]["train_path"])
     validation_path = Path(
         config["data"]["validation_path"]
@@ -77,6 +86,7 @@ def main() -> None:
         ],
         max_size=config["data"]["vocab_max_size"],
     )
+
     vocabulary.save(
         output_directory / "vocabulary.json"
     )
@@ -149,8 +159,15 @@ def main() -> None:
 
     parameter_count = count_trainable_parameters(model)
 
+    if device.type == "cuda":
+        hardware = torch.cuda.get_device_name(0)
+    else:
+        hardware = platform.processor() or "CPU"
+
     print(f"Device: {device}")
+    print(f"Hardware: {hardware}")
     print(f"PyTorch: {torch.__version__}")
+    print(f"Mixed precision: {use_amp}")
     print(f"Vocabulary size: {len(vocabulary):,}")
     print(f"Training examples: {len(train_dataset):,}")
     print(
@@ -167,22 +184,36 @@ def main() -> None:
     epochs = config["training"]["epochs"]
 
     for epoch in range(1, epochs + 1):
+        train_batches = tqdm(
+            train_loader,
+            desc=f"Epoch {epoch}/{epochs} train",
+            leave=False,
+        )
+
         train_result = run_epoch(
             model,
-            train_loader,
+            train_batches,
             pad_id=vocabulary.pad_id,
             device=device,
             optimizer=optimizer,
             max_gradient_norm=config["training"][
                 "max_gradient_norm"
             ],
+            use_amp=use_amp,
+        )
+
+        validation_batches = tqdm(
+            validation_loader,
+            desc=f"Epoch {epoch}/{epochs} validation",
+            leave=False,
         )
 
         validation_result = run_epoch(
             model,
-            validation_loader,
+            validation_batches,
             pad_id=vocabulary.pad_id,
             device=device,
+            use_amp=use_amp,
         )
 
         print(
@@ -229,8 +260,9 @@ def main() -> None:
     summary = {
         "seed": seed,
         "device": str(device),
-        "hardware": platform.processor() or "CPU",
+        "hardware": hardware,
         "torch_version": torch.__version__,
+        "mixed_precision": use_amp,
         "parameter_count": parameter_count,
         "training_seconds": elapsed,
         "best_epoch": best_epoch,

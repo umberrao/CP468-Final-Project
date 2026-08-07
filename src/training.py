@@ -84,12 +84,21 @@ def run_epoch(
     device: torch.device,
     optimizer: Optimizer | None = None,
     max_gradient_norm: float = 1.0,
+    use_amp: bool = False,
 ) -> EpochResult:
     training = optimizer is not None
+    amp_enabled = use_amp and device.type == "cuda"
+
     model.train(training)
 
     total_loss = 0.0
     total_tokens = 0
+
+    scaler = (
+        torch.amp.GradScaler("cuda")
+        if training and amp_enabled
+        else None
+    )
 
     context = (
         torch.enable_grad()
@@ -110,30 +119,50 @@ def run_epoch(
             if training:
                 optimizer.zero_grad(set_to_none=True)
 
-            logits, _ = model(
-                source_ids,
-                source_lengths,
-                source_mask,
-                target_input_ids,
-            )
+            with torch.autocast(
+                device_type=device.type,
+                dtype=torch.float16,
+                enabled=amp_enabled,
+            ):
+                logits, _ = model(
+                    source_ids,
+                    source_lengths,
+                    source_mask,
+                    target_input_ids,
+                )
 
-            loss = sequence_cross_entropy(
-                logits,
-                target_output_ids,
-                pad_id,
-            )
+                loss = sequence_cross_entropy(
+                    logits,
+                    target_output_ids,
+                    pad_id,
+                )
 
             token_count = int(
                 target_output_ids.ne(pad_id).sum().item()
             )
 
             if training:
-                loss.backward()
-                clip_grad_norm_(
-                    model.parameters(),
-                    max_gradient_norm,
-                )
-                optimizer.step()
+                if scaler is not None:
+                    scaler.scale(loss).backward()
+                    scaler.unscale_(optimizer)
+
+                    clip_grad_norm_(
+                        model.parameters(),
+                        max_gradient_norm,
+                    )
+
+                    scaler.step(optimizer)
+                    scaler.update()
+
+                else:
+                    loss.backward()
+
+                    clip_grad_norm_(
+                        model.parameters(),
+                        max_gradient_norm,
+                    )
+
+                    optimizer.step()
 
             total_loss += loss.item() * token_count
             total_tokens += token_count
