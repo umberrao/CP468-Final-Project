@@ -33,8 +33,24 @@ def tokenize(text: str) -> list[str]:
 def detokenize(tokens: Sequence[str]) -> str:
     """Join tokens into readable text."""
     text = " ".join(tokens)
+
+    # WikiAuto uses <SEP> to separate split sentences.
+    text = re.sub(
+        r"([.!?])\s*<\s*sep\s*>\s*",
+        r"\1 ",
+        text,
+        flags=re.IGNORECASE,
+    )
+    text = re.sub(
+        r"\s*<\s*sep\s*>\s*",
+        ". ",
+        text,
+        flags=re.IGNORECASE,
+    )
+
     text = re.sub(r"\s+([,.;:!?%…)\]}])", r"\1", text)
     text = re.sub(r"([(\[{])\s+", r"\1", text)
+
     return text.strip()
 
 

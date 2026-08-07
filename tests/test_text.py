@@ -22,6 +22,22 @@ def test_tokenize_and_detokenize() -> None:
     ]
     assert detokenize(tokens) == "a well-known cat's toy."
 
+def test_detokenize_sep_as_sentence_boundary() -> None:
+    tokens = [
+        "first",
+        "sentence",
+        "<",
+        "sep",
+        ">",
+        "second",
+        "sentence",
+        ".",
+    ]
+
+    assert detokenize(tokens) == (
+        "first sentence. second sentence."
+    )
+
 
 def test_vocabulary_special_tokens() -> None:
     vocabulary = Vocabulary.build(
