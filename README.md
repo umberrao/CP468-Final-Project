@@ -1,87 +1,78 @@
 # CP468 Final Project: LSTM vs. LLM Text Simplification
 
+## Submission Links
+
+- **GitHub repository:** [CP468 Final Project](https://github.com/umberrao/CP468-Final-Project)
+- **Video demonstration:** **ADD FINAL VIDEO LINK HERE BEFORE SUBMISSION**
+
 ## Project Status
 
-The data pipeline, custom PyTorch models, GPU training, ablation,
-evaluation system, local LLM experiments, qualitative/error analysis,
-and final figures are complete. All six evaluated configurations used
-the same frozen 359-example ASSET test set with 10 human references per
-example.
+We have completed the project implementation and experimental evaluation. This includes dataset preparation, leakage validation, training the attention and no-attention models, full ASSET evaluation, local Qwen comparisons, qualitative analysis, error analysis, report figures, and automated testing.
 
-Remaining work consists of resolving or documenting the missing exact
-attention-model training time, writing the five-page report, and
-recording the eight-minute demonstration video.
+All six evaluated configurations used the same frozen ASSET test set containing 359 examples with 10 human simplification references per example.
+
+The written report has also been drafted. The remaining submission tasks are to add the final video link, complete the team-contribution and AI-use details, proofread the report, export it as a PDF, and submit the required materials.
 
 ## Project Goal
 
-This project compares a custom LSTM sequence-to-sequence model with
-attention against a modern instruction-tuned Large Language Model for
-English text simplification.
+In this project, we compare a custom LSTM sequence-to-sequence model with a modern instruction-tuned Large Language Model for English text simplification.
 
 - **Input:** Complex English text
 - **Output:** Simplified English text
-- **Training data:** WikiAuto
-- **Test data:** ASSET
+- **Training dataset:** WikiAuto
+- **Evaluation dataset:** ASSET
 - **Primary metric:** SARI
-- **Secondary metric:** BLEU
+- **Secondary metric:** Lowercase SacreBLEU with 13a tokenization
 - **Random seed:** 468
+
+Our custom model uses a bidirectional LSTM encoder, an LSTM decoder, and masked additive attention. We compare it with a no-attention ablation and four prompting configurations of Qwen2.5-7B-Instruct.
 
 ## Final Results
 
-| System                 | Prompt setting        |        SARI |        BLEU | Recorded evaluation/generation time |
-| ---------------------- | --------------------- | ----------: | ----------: | ----------------------------------: |
-| LSTM without attention | N/A                   |     22.9017 |      1.9097 |                               5.4 s |
-| LSTM with attention    | N/A                   |     35.5013 |     39.3457 |                               7.7 s |
-| Qwen2.5-7B-Instruct    | Direct zero-shot      |     44.7089 |     69.7172 |                             308.6 s |
-| Qwen2.5-7B-Instruct    | Controlled zero-shot  |     46.8721 |     62.3587 |                             384.3 s |
-| Qwen2.5-7B-Instruct    | Direct three-shot     |     45.1292 |     76.6130 |                             396.7 s |
-| Qwen2.5-7B-Instruct    | Controlled three-shot | **49.7276** | **81.7623** |                             496.8 s |
+| System                 | Prompt setting        |        SARI |        BLEU | Evaluation or generation time |
+| ---------------------- | --------------------- | ----------: | ----------: | ----------------------------: |
+| LSTM without attention | N/A                   |     22.9017 |      1.9097 |                         5.4 s |
+| LSTM with attention    | N/A                   |     35.5013 |     39.3457 |                         7.7 s |
+| Qwen2.5-7B-Instruct    | Direct zero-shot      |     44.7089 |     69.7172 |                       308.6 s |
+| Qwen2.5-7B-Instruct    | Controlled zero-shot  |     46.8721 |     62.3587 |                       384.3 s |
+| Qwen2.5-7B-Instruct    | Direct three-shot     |     45.1292 |     76.6130 |                       396.7 s |
+| Qwen2.5-7B-Instruct    | Controlled three-shot | **49.7276** | **81.7623** |                       496.8 s |
 
-The attention mechanism improved SARI by 12.5996 points over the
-no-attention ablation. The best LLM setting improved SARI by 14.2263
-points over the attention model. SARI is treated as the main result;
-BLEU is reported as a secondary lexical-overlap metric.
+The attention mechanism improved SARI by 12.5996 points compared with the no-attention ablation. This result demonstrates that attention substantially improved the custom model’s ability to retain and selectively use information from the source sentence.
 
-Machine-readable values are stored in
-`results/final_metrics.json`.
+The controlled three-shot Qwen configuration produced the best overall result. It improved SARI by 14.2263 points compared with the attention model.
 
-## Qualitative and Error Analysis
+We treat SARI as the primary evaluation metric because it measures the quality of text simplification operations. BLEU is reported as a secondary lexical-overlap metric and should not be interpreted as a complete measure of simplification quality.
 
-Predictions from the attention model, no-attention ablation, and best
-Qwen configuration were aligned across all 359 test examples. Ten
-side-by-side examples were selected for manual assessment.
+Machine-readable experimental values are stored in:
 
-Automatic diagnostic flags cover unknown tokens, repetition,
-over-deletion, under-simplification, number loss, added numbers, and
-name loss. These flags identify outputs that require manual review;
-they are not treated as definitive errors by themselves.
-
-Key observations include:
-
-- Attention reduced unknown-token flags from 91.9% to 76.9%.
-- Attention reduced repetition flags from 54.9% to 32.0%.
-- Attention reduced name-loss flags from 83.8% to 63.2%.
-- Qwen produced no unknown-token flags and only 2.2% repetition flags.
-- Qwen had the strongest overall outputs, but 29.2% were flagged for
-  possible under-simplification.
-
-The completed analysis is stored in:
-
-- `results/analysis/qualitative_examples.md`
-- `results/analysis/error_counts.csv`
+```text
+results/final_metrics.json
+```
 
 ## Final Figures
 
-The repository includes three reproducible report figures:
+### Overall Model Performance
 
-- `report/figures/model_scores.png`
-- `report/figures/qwen_prompt_comparison.png`
-- `report/figures/error_rates.png`
+![Text simplification performance on ASSET](report/figures/model_scores.png)
+
+### Effect of Qwen Prompt Design
+
+![Effect of Qwen prompt design](report/figures/qwen_prompt_comparison.png)
+
+### Automatic Diagnostic Flags
+
+![Automatic diagnostic flags by model](report/figures/error_rates.png)
+
+The figures can be regenerated using:
+
+```powershell
+python -m scripts.create_figures
+```
 
 ## Dataset
 
-The data is prepared from `GEM/wiki_auto_asset_turk` using streaming
-downloads from Hugging Face.
+We prepared the data from the `GEM/wiki_auto_asset_turk` dataset using streaming downloads from Hugging Face.
 
 | Split      | Source   | Examples | References per example |
 | ---------- | -------- | -------: | ---------------------: |
@@ -89,114 +80,213 @@ downloads from Hugging Face.
 | Validation | WikiAuto |    2,000 |                      1 |
 | Test       | ASSET    |      359 |                     10 |
 
-Data preparation produced zero source overlaps between training,
-validation, and test data. The vocabulary is built only from the
-training split. Generated dataset files are excluded from Git and can
-be reproduced with the preparation script.
+We collected the validation and test splits before the training split. We then excluded any training source sentence that appeared in either held-out split.
 
-Dataset licenses recorded by the manifest:
+The final leakage checks found:
 
-- WikiAuto train/validation: CC BY-NC 3.0
-- ASSET test: CC BY-NC 4.0
+- Zero training–holdout source overlaps
+- Zero validation–test source overlaps
+- Zero training examples removed for overlap in the final preparation run
+
+We built the model vocabulary using only the training split. This prevents information from the validation or test sets from entering the vocabulary construction process.
+
+Generated dataset files are excluded from Git because they can be reproduced using the preparation script.
+
+Dataset licenses recorded in the generated manifest are:
+
+- **WikiAuto training and validation:** CC BY-NC 3.0
+- **ASSET test:** CC BY-NC 4.0
 
 ## Custom Model Architecture
 
-The sequence-to-sequence models are implemented directly in PyTorch:
+We implemented the sequence-to-sequence models directly in PyTorch. The main architecture contains:
 
 1. Token embeddings
-2. Bidirectional LSTM encoder
-3. Optional masked additive attention
-4. LSTM decoder
-5. Vocabulary output projection
+2. A bidirectional LSTM encoder
+3. Masked additive attention
+4. An LSTM decoder
+5. A vocabulary output projection
 6. Greedy autoregressive inference
 
-Padding masks prevent attention from using padded tokens. The
-no-attention model retains the same data, training, and decoding setup
-while removing the attention component.
+The attention mask prevents the decoder from attending to padding tokens.
+
+For the ablation experiment, we retained the same dataset, preprocessing, vocabulary, encoder, decoder dimensions, training procedure, and inference method while disabling the attention mechanism.
 
 ### Shared Configuration
 
-- Embedding dimension: 256
-- Encoder hidden dimension: 256
-- Decoder hidden dimension: 256
-- Attention dimension: 256
-- Dropout: 0.3
-- Maximum vocabulary: 20,000
-- Maximum source/target length: 80
-- Batch size: 32
-- Maximum epochs: 10
-- Learning rate: 0.001
-- Gradient clipping: 1.0
-- Mixed precision: enabled on CUDA
-- Hardware: Tesla T4
+- **Embedding dimension:** 256
+- **Encoder hidden dimension:** 256
+- **Decoder hidden dimension:** 256
+- **Attention dimension:** 256
+- **Dropout:** 0.3
+- **Maximum vocabulary size:** 20,000
+- **Maximum source length:** 80 tokens
+- **Maximum target length:** 80 tokens
+- **Batch size:** 32
+- **Maximum epochs:** 10
+- **Learning rate:** 0.001
+- **Gradient clipping:** 1.0
+- **Mixed precision:** Enabled on CUDA
+- **Training hardware:** NVIDIA Tesla T4
 
 ### Training Outcomes
 
-| Model        | Parameters | Best epoch | Best validation loss | Best validation perplexity |                    Training time |
-| ------------ | ---------: | ---------: | -------------------: | -------------------------: | -------------------------------: |
-| Attention    | 33,302,816 |          4 |               2.7854 |                      16.21 | Not captured for interrupted run |
-| No attention | 22,341,664 |          5 |               4.7791 |                     118.99 |                        2,251.7 s |
+| Model                  | Trainable parameters | Best epoch | Best validation loss | Best validation perplexity |                             Recorded training time |
+| ---------------------- | -------------------: | ---------: | -------------------: | -------------------------: | -------------------------------------------------: |
+| LSTM with attention    |           33,302,816 |          4 |               2.7854 |                      16.21 | Approximately 1,690.0 s to the selected checkpoint |
+| LSTM without attention |           22,341,664 |          5 |               4.7791 |                     118.99 |                                          2,251.7 s |
 
-The attention session ended after epoch 7, but best-checkpoint saving
-preserved epoch 4. Validation loss had already stopped improving after
-that epoch. The missing exact attention training time must be noted or
-resolved before the final report is submitted.
+The attention model achieved its best validation loss of 2.7854 and validation perplexity of 16.21 at epoch 4. Based on the timestamps of the saved vocabulary and best checkpoint, reaching the selected checkpoint required approximately 1,690 seconds, or 28.2 minutes, on a Tesla T4.
+
+The attention run continued through epoch 7 before the session ended. Therefore, 1,690 seconds is an estimate of the time required to reach the selected epoch-4 checkpoint, not the exact duration of the entire interrupted run. The best epoch-4 checkpoint was preserved correctly.
+
+The no-attention model completed all 10 configured epochs. Its best validation result occurred at epoch 5, after which validation performance stopped improving.
 
 ## Local LLM Baseline
 
-The comparison model is `Qwen/Qwen2.5-7B-Instruct`, run locally on a
-Tesla T4 using 4-bit NF4 quantization. No paid API was used, so the API
-cost was $0.
+We used `Qwen/Qwen2.5-7B-Instruct` as the Large Language Model comparison.
 
-Four required prompt settings were evaluated:
+We ran the model locally on a Tesla T4 using 4-bit NF4 quantization. No paid API was used, resulting in an API cost of $0.
+
+We evaluated four prompting conditions:
 
 - Direct zero-shot
 - Controlled zero-shot
 - Direct three-shot
 - Controlled three-shot
 
-The three demonstrations are fixed WikiAuto training examples and are
-never taken from the test set. Exact system prompts, user templates,
-and demonstrations are defined in `src/llm.py` and saved with each
-evaluation result. Decoding is deterministic and greedy.
+The three-shot experiments used the same three fixed WikiAuto training examples. We did not select demonstrations from the ASSET test set.
 
-The four full evaluations required 1,586.3 seconds of generation time,
-or approximately 0.441 Tesla T4 GPU-hours.
+The exact system prompts, user prompt templates, and three-shot demonstrations are defined in:
 
-LLM environment:
+```text
+src/llm.py
+```
 
-- Transformers 5.0.0
-- Accelerate 1.13.0
-- BitsAndBytes 0.50.0
-- PyTorch 2.10.0+cu128
+The evaluation script uses deterministic greedy decoding with sampling disabled.
+
+### Qwen Generation Configuration
+
+- **Model:** Qwen/Qwen2.5-7B-Instruct
+- **Quantization:** 4-bit NF4
+- **Double quantization:** Enabled
+- **Computation type:** Float16
+- **Decoding:** Greedy
+- **Sampling:** Disabled
+- **Number of beams:** 1
+- **Maximum input length:** 1,024 tokens
+- **Maximum generated length:** 96 tokens
+- **Random seed:** 468
+- **Hardware:** NVIDIA Tesla T4
+
+### Qwen Runtime
+
+The four full Qwen evaluations required:
+
+- **Total generation time:** 1,586.3 seconds
+- **Approximate GPU usage:** 0.441 Tesla T4 GPU-hours
+- **API cost:** $0
+
+### Qwen Environment
+
+- **PyTorch:** 2.10.0+cu128
+- **Transformers:** 5.0.0
+- **Accelerate:** 1.13.0
+- **BitsAndBytes:** 0.50.0
+- **SacreBLEU:** 2.6.0
+
+## Qualitative and Error Analysis
+
+We aligned predictions from the attention model, no-attention ablation, and best Qwen configuration across all 359 test examples.
+
+We then selected 10 representative examples for side-by-side manual assessment.
+
+The automatic diagnostic analysis checks for:
+
+- Unknown tokens
+- Repetition
+- Possible over-deletion
+- Possible under-simplification
+- Possible number loss
+- Added numbers
+- Possible name loss
+
+These diagnostic flags identify outputs that may require manual review. We do not treat every automatic flag as a definitive model error.
+
+### Main Error-Analysis Findings
+
+- Attention reduced unknown-token flags from 91.9% to 76.9%.
+- Attention reduced repetition flags from 54.9% to 32.0%.
+- Attention reduced name-loss flags from 83.8% to 63.2%.
+- Qwen produced no unknown-token flags.
+- Qwen produced repetition flags on only 2.2% of examples.
+- Qwen produced name-loss flags on 9.7% of examples.
+- Qwen produced number-loss flags on 0.8% of examples.
+- Qwen was flagged for possible under-simplification on 29.2% of examples.
+
+The results indicate that attention substantially improved the custom LSTM model, particularly by reducing repetition and information loss. However, the limited word-level vocabulary still caused frequent unknown tokens.
+
+Qwen produced the strongest overall outputs and preserved names and numbers more reliably. Its main remaining weakness was occasional under-simplification.
+
+The completed analysis files are stored in:
+
+```text
+results/analysis/qualitative_examples.md
+results/analysis/error_counts.csv
+```
 
 ## Reproducibility
 
-- Fixed seed of 468
+We used the following measures to make the experiments reproducible:
+
+- Fixed random seed of 468
 - Pinned local and LLM dependencies
 - Deterministic dataset preparation
 - Training-only vocabulary construction
-- Leakage validation and dataset hashes
+- Source-level leakage checks
+- Dataset file hashes
 - Configuration-based model experiments
-- Gradient clipping and mixed-precision support
-- Validation tracking and best-model checkpointing
-- Exact prompt definitions and decoding settings
+- Gradient clipping
+- Mixed-precision training support
+- Validation-loss tracking
+- Best-model checkpointing
+- Exact Qwen prompt definitions
+- Deterministic greedy decoding
 - Resumable LLM evaluation
-- Saved predictions, per-example SARI, aggregate metrics, and runtime
-- Reproducible qualitative/error analysis and figure generation
+- Saved predictions and per-example SARI scores
+- Saved aggregate metrics and runtime information
+- Reproducible qualitative analysis
+- Reproducible error analysis
+- Reproducible report figures
 - **47 automated tests passing**
 
-## Running the Project
+## Installation
 
-Run commands from the repository root.
+Run all commands from the repository root.
 
 ### Local Development Environment
 
-The main requirements use CPU-only PyTorch for Windows development:
+The main requirements file installs CPU-only PyTorch for local Windows development:
 
 ```powershell
 python -m pip install -r requirements.txt
 ```
+
+The local dependency versions are pinned in `requirements.txt`.
+
+### Colab LLM Environment
+
+For the Qwen experiments, use a CUDA-enabled Google Colab runtime.
+
+Do not install the CPU-only PyTorch version from `requirements.txt` in Colab. Colab supplies its own CUDA-enabled PyTorch build.
+
+Install the LLM-specific packages using:
+
+```bash
+python -m pip install -r requirements-llm.txt
+```
+
+## Running the Project
 
 ### Prepare the Final Dataset
 
@@ -204,7 +294,18 @@ python -m pip install -r requirements.txt
 python scripts/prepare_data.py --train-size 50000 --validation-size 2000 --shuffle-buffer 10000 --output-dir data/raw/final
 ```
 
-### Run Tests
+Expected output:
+
+```text
+Train examples:      50000
+Validation examples: 2000
+Test examples:       359
+Removed overlaps:    0
+Leakage check:       PASSED
+Manifest:            data/raw/final/manifest.json
+```
+
+### Run the Automated Tests
 
 ```powershell
 python -m pytest -q
@@ -216,24 +317,17 @@ Expected result:
 47 passed
 ```
 
-### Analyze Model Outputs
+### Train the Attention Model
 
-```powershell
-python -m scripts.analyze_results --attention results/attention/predictions.jsonl --no-attention results/no_attention/predictions.jsonl --qwen results/qwen2_5_7b/controlled_3shot/predictions.jsonl --output-dir results/analysis
-```
-
-### Generate Report Figures
-
-```powershell
-python -m scripts.create_figures
-```
-
-### Train the Custom Models
-
-These commands should be run in a CUDA-enabled environment:
+This command should be run in a CUDA-enabled environment:
 
 ```powershell
 python -m scripts.train --config configs/final.yaml
+```
+
+### Train the No-Attention Ablation
+
+```powershell
 python -m scripts.train --config configs/no_attention.yaml
 ```
 
@@ -257,17 +351,30 @@ python -m scripts.simplify --text "The scientist conducted an extensive investig
 
 ### Run the Local Qwen Evaluation
 
-Use a Colab GPU runtime. Colab supplies its CUDA-enabled PyTorch build;
-do not replace it with the CPU-only PyTorch pin from `requirements.txt`.
-
 ```bash
-python -m pip install -r requirements-llm.txt
 python -m scripts.evaluate_llm --test-data data/raw/final/test.jsonl --output-dir results/qwen2_5_7b
 ```
 
-The evaluator validates all 359 test records and all 10 references,
-runs the four prompt settings, saves progress after every batch, and
-resumes safely after an interruption.
+The Qwen evaluator:
+
+- Validates all 359 ASSET test records
+- Verifies that every example contains 10 references
+- Evaluates all four prompt configurations
+- Saves progress during generation
+- Resumes safely after an interruption
+- Saves predictions and aggregate metrics for every configuration
+
+### Analyze the Model Outputs
+
+```powershell
+python -m scripts.analyze_results --attention results/attention/predictions.jsonl --no-attention results/no_attention/predictions.jsonl --qwen results/qwen2_5_7b/controlled_3shot/predictions.jsonl --output-dir results/analysis
+```
+
+### Generate the Report Figures
+
+```powershell
+python -m scripts.create_figures
+```
 
 ## Project Structure
 
@@ -279,6 +386,8 @@ CP468-Final-Project/
 |   |-- no_attention.yaml
 |   `-- smoke.yaml
 |-- data/
+|   |-- processed/
+|   `-- raw/
 |-- report/
 |   `-- figures/
 |       |-- error_rates.png
@@ -299,6 +408,10 @@ CP468-Final-Project/
 |   `-- train.py
 |-- src/
 |   |-- models/
+|   |   |-- attention.py
+|   |   |-- decoder.py
+|   |   |-- encoder.py
+|   |   `-- seq2seq.py
 |   |-- analysis.py
 |   |-- data.py
 |   |-- inference.py
@@ -312,27 +425,33 @@ CP468-Final-Project/
 `-- README.md
 ```
 
+Generated datasets and model checkpoints are excluded from Git because they are large and can be recreated using the provided scripts. The final aggregate metrics, qualitative analysis, error counts, report figures, configurations, and source code are included in the repository.
+
 ## Completed Work
 
-- [x] Reproducible WikiAuto/ASSET data pipeline
-- [x] Leakage-free 50,000/2,000/359 splits
-- [x] Custom bidirectional LSTM Seq2Seq model
+- [x] Reproducible WikiAuto and ASSET data pipeline
+- [x] Leakage-free 50,000/2,000/359 data splits
+- [x] Training-only vocabulary construction
+- [x] Custom bidirectional LSTM sequence-to-sequence model
 - [x] Masked additive attention
 - [x] No-attention ablation
 - [x] GPU training with mixed precision
-- [x] SARI and BLEU implementation
-- [x] Full 359-example evaluation with 10 references
-- [x] Qwen zero-shot and three-shot baselines
-- [x] Two exact prompt variants
+- [x] Validation tracking and checkpointing
+- [x] SARI evaluation
+- [x] SacreBLEU evaluation
+- [x] Full 359-example ASSET evaluation
+- [x] Evaluation with 10 references per test example
+- [x] Qwen zero-shot comparison
+- [x] Qwen three-shot comparison
+- [x] Direct and controlled prompt variants
+- [x] Local 4-bit Qwen inference
 - [x] LLM runtime and cost accounting
-- [x] Reproducible LLM evaluation script
+- [x] Resumable LLM evaluation
 - [x] Qualitative analysis of 10 examples
-- [x] Automatic and manual error analysis
-- [x] Final comparison and diagnostic figures
-- [x] 47 automated tests
-
-## Remaining Work
-
-1. Resolve or document the missing exact attention training time.
-2. Write the five-page report plus references/appendix.
-3. Record and edit the eight-minute demonstration video.
+- [x] Automatic diagnostic analysis
+- [x] Manual error assessment
+- [x] Final metrics file
+- [x] Final report figures
+- [x] Attention training-time estimate documented
+- [x] 47 automated tests passing
+- [x] Final report drafted
