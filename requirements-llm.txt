@@ -1,0 +1,10 @@
+# Install these packages in a Colab GPU runtime. Do not install the
+# CPU-only torch pin from requirements.txt in Colab; Colab supplies
+# its own CUDA-enabled PyTorch build.
+
+accelerate==1.13.0
+bitsandbytes==0.50.0
+datasets==5.0.1
+sacrebleu==2.6.0
+tqdm==4.70.0
+transformers==5.0.0
