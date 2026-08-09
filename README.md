@@ -148,7 +148,7 @@ LLM environment:
 - Exact prompt definitions and decoding settings
 - Resumable LLM evaluation
 - Saved predictions, per-example SARI, aggregate metrics, and runtime
-- **38 automated tests passing**
+- **45 automated tests passing**
 
 ## Running the Project
 
@@ -177,7 +177,7 @@ python -m pytest -q
 Expected result:
 
 ```text
-38 passed
+45 passed
 ```
 
 ### Train the Custom Models
@@ -269,7 +269,7 @@ CP468-Final-Project/
 - [x] Two exact prompt variants
 - [x] LLM runtime and cost accounting
 - [x] Reproducible LLM evaluation script
-- [x] 38 automated tests
+- [x] 45 automated tests
 
 ## Remaining Work
 
