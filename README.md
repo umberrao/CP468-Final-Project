@@ -3,12 +3,14 @@
 ## Project Status
 
 The data pipeline, custom PyTorch models, GPU training, ablation,
-evaluation system, and local LLM experiments are complete. All six
-evaluated configurations used the same frozen 359-example ASSET test
-set with 10 human references per example.
+evaluation system, local LLM experiments, qualitative/error analysis,
+and final figures are complete. All six evaluated configurations used
+the same frozen 359-example ASSET test set with 10 human references per
+example.
 
-Remaining work consists of qualitative/error analysis, figures, the
-five-page report, and the eight-minute demonstration video.
+Remaining work consists of resolving or documenting the missing exact
+attention-model training time, writing the five-page report, and
+recording the eight-minute demonstration video.
 
 ## Project Goal
 
@@ -42,6 +44,39 @@ BLEU is reported as a secondary lexical-overlap metric.
 
 Machine-readable values are stored in
 `results/final_metrics.json`.
+
+## Qualitative and Error Analysis
+
+Predictions from the attention model, no-attention ablation, and best
+Qwen configuration were aligned across all 359 test examples. Ten
+side-by-side examples were selected for manual assessment.
+
+Automatic diagnostic flags cover unknown tokens, repetition,
+over-deletion, under-simplification, number loss, added numbers, and
+name loss. These flags identify outputs that require manual review;
+they are not treated as definitive errors by themselves.
+
+Key observations include:
+
+- Attention reduced unknown-token flags from 91.9% to 76.9%.
+- Attention reduced repetition flags from 54.9% to 32.0%.
+- Attention reduced name-loss flags from 83.8% to 63.2%.
+- Qwen produced no unknown-token flags and only 2.2% repetition flags.
+- Qwen had the strongest overall outputs, but 29.2% were flagged for
+  possible under-simplification.
+
+The completed analysis is stored in:
+
+- `results/analysis/qualitative_examples.md`
+- `results/analysis/error_counts.csv`
+
+## Final Figures
+
+The repository includes three reproducible report figures:
+
+- `report/figures/model_scores.png`
+- `report/figures/qwen_prompt_comparison.png`
+- `report/figures/error_rates.png`
 
 ## Dataset
 
@@ -148,7 +183,8 @@ LLM environment:
 - Exact prompt definitions and decoding settings
 - Resumable LLM evaluation
 - Saved predictions, per-example SARI, aggregate metrics, and runtime
-- **45 automated tests passing**
+- Reproducible qualitative/error analysis and figure generation
+- **47 automated tests passing**
 
 ## Running the Project
 
@@ -177,7 +213,19 @@ python -m pytest -q
 Expected result:
 
 ```text
-45 passed
+47 passed
+```
+
+### Analyze Model Outputs
+
+```powershell
+python -m scripts.analyze_results --attention results/attention/predictions.jsonl --no-attention results/no_attention/predictions.jsonl --qwen results/qwen2_5_7b/controlled_3shot/predictions.jsonl --output-dir results/analysis
+```
+
+### Generate Report Figures
+
+```powershell
+python -m scripts.create_figures
 ```
 
 ### Train the Custom Models
@@ -233,9 +281,17 @@ CP468-Final-Project/
 |-- data/
 |-- report/
 |   `-- figures/
+|       |-- error_rates.png
+|       |-- model_scores.png
+|       `-- qwen_prompt_comparison.png
 |-- results/
+|   |-- analysis/
+|   |   |-- error_counts.csv
+|   |   `-- qualitative_examples.md
 |   `-- final_metrics.json
 |-- scripts/
+|   |-- analyze_results.py
+|   |-- create_figures.py
 |   |-- evaluate.py
 |   |-- evaluate_llm.py
 |   |-- prepare_data.py
@@ -243,6 +299,7 @@ CP468-Final-Project/
 |   `-- train.py
 |-- src/
 |   |-- models/
+|   |-- analysis.py
 |   |-- data.py
 |   |-- inference.py
 |   |-- llm.py
@@ -269,13 +326,13 @@ CP468-Final-Project/
 - [x] Two exact prompt variants
 - [x] LLM runtime and cost accounting
 - [x] Reproducible LLM evaluation script
-- [x] 45 automated tests
+- [x] Qualitative analysis of 10 examples
+- [x] Automatic and manual error analysis
+- [x] Final comparison and diagnostic figures
+- [x] 47 automated tests
 
 ## Remaining Work
 
 1. Resolve or document the missing exact attention training time.
-2. Select at least 10 side-by-side qualitative examples.
-3. Categorize and quantify model errors.
-4. Generate final tables and figures.
-5. Write the five-page report plus references/appendix.
-6. Record and edit the eight-minute demonstration video.
+2. Write the five-page report plus references/appendix.
+3. Record and edit the eight-minute demonstration video.
