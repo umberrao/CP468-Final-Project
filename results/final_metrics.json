@@ -1,0 +1,87 @@
+{
+  "dataset": {
+    "name": "GEM/wiki_auto_asset_turk",
+    "train_examples": 50000,
+    "validation_examples": 2000,
+    "test_examples": 359,
+    "references_per_test_example": 10,
+    "seed": 468,
+    "leakage_check_passed": true
+  },
+  "evaluation": {
+    "primary_metric": "SARI",
+    "secondary_metric": "lowercase SacreBLEU with 13a tokenization"
+  },
+  "custom_models": {
+    "attention": {
+      "parameter_count": 33302816,
+      "best_epoch": 4,
+      "best_validation_loss": 2.78536920227101,
+      "best_validation_perplexity": 16.21,
+      "observed_epochs": 7,
+      "training_seconds": null,
+      "training_note": "The session ended after epoch 7; the best epoch 4 checkpoint was preserved.",
+      "sari": 35.50125787490765,
+      "bleu": 39.3456767202758,
+      "evaluation_seconds": 7.728564734001338,
+      "hardware": "Tesla T4",
+      "mixed_precision": true
+    },
+    "no_attention": {
+      "parameter_count": 22341664,
+      "best_epoch": 5,
+      "best_validation_loss": 4.7791,
+      "best_validation_perplexity": 118.99,
+      "observed_epochs": 10,
+      "training_seconds": 2251.7,
+      "sari": 22.9017,
+      "bleu": 1.9097,
+      "evaluation_seconds": 5.4,
+      "hardware": "Tesla T4",
+      "mixed_precision": true
+    }
+  },
+  "llm": {
+    "model": "Qwen/Qwen2.5-7B-Instruct",
+    "execution": "local open weights",
+    "quantization": "4-bit NF4",
+    "decoding": "greedy",
+    "hardware": "Tesla T4",
+    "api_cost_usd": 0.0,
+    "total_generation_seconds": 1586.3,
+    "gpu_hours": 0.441,
+    "versions": {
+      "torch": "2.10.0+cu128",
+      "transformers": "5.0.0",
+      "accelerate": "1.13.0",
+      "bitsandbytes": "0.50.0",
+      "sacrebleu": "2.6.0"
+    },
+    "settings": {
+      "direct_0shot": {
+        "shots": 0,
+        "sari": 44.7089,
+        "bleu": 69.7172,
+        "generation_seconds": 308.6
+      },
+      "controlled_0shot": {
+        "shots": 0,
+        "sari": 46.8721,
+        "bleu": 62.3587,
+        "generation_seconds": 384.3
+      },
+      "direct_3shot": {
+        "shots": 3,
+        "sari": 45.1292,
+        "bleu": 76.613,
+        "generation_seconds": 396.7
+      },
+      "controlled_3shot": {
+        "shots": 3,
+        "sari": 49.7276,
+        "bleu": 81.7623,
+        "generation_seconds": 496.8
+      }
+    }
+  }
+}
