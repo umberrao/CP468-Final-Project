@@ -1,8 +1,8 @@
 seed: 468
 
 data:
-  train_path: data/raw/train.jsonl
-  validation_path: data/raw/validation.jsonl
+  train_path: data/raw/final/train.jsonl
+  validation_path: data/raw/final/validation.jsonl
   max_source_length: 80
   max_target_length: 80
   vocab_min_frequency: 1
