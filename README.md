@@ -36,7 +36,7 @@ Our custom model uses a bidirectional LSTM encoder, an LSTM decoder, and masked 
 | Qwen2.5-7B-Instruct    | Direct zero-shot      |     44.7089 |     69.7172 |                       308.6 s |
 | Qwen2.5-7B-Instruct    | Controlled zero-shot  |     46.8721 |     62.3587 |                       384.3 s |
 | Qwen2.5-7B-Instruct    | Direct three-shot     |     45.1292 |     76.6130 |                       396.7 s |
-| Qwen2.5-7B-Instruct    | Controlled three-shot | **49.7276** | **81.7623** |                       496.8 s |
+| Qwen2.5-7B-Instruct    | Controlled three-shot | **49.7315** | **81.7931** |                       496.8 s |
 
 The attention mechanism improved SARI by 12.5996 points compared with the no-attention ablation. This result demonstrates that attention substantially improved the custom model’s ability to retain and selectively use information from the source sentence.
 
