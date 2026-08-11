@@ -3,7 +3,9 @@
 ## Submission Links
 
 - **GitHub repository:** [CP468 Final Project](https://github.com/umberrao/CP468-Final-Project)
-- **Video demonstration:** **ADD FINAL VIDEO LINK HERE BEFORE SUBMISSION**
+- **Video demonstration:** [Video Demo](https://drive.google.com/file/d/1CtBbPCeGhq3ac4Dda5xK7RCQgjCzOE_t/view?usp=sharing)
+
+
 
 ## Project Status
 
